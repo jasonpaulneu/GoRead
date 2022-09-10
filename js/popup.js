@@ -8,7 +8,6 @@
 //get selected language and set it as a value for the selected input
 chrome.storage.sync.get(['selectedLanguage'], (result) => {
   let selectedLanguageElement = document.getElementById("language-select");
-  console.log("result",result)
   selectedLanguageElement.value=result.selectedLanguage;
 });
 
@@ -22,7 +21,12 @@ const selectLanguageOnChange = () =>{
 let selectedLanguageElement = document.getElementById("language-select");
 selectedLanguageElement.addEventListener('change',selectLanguageOnChange);
 
-
+//get number of words
+chrome.storage.sync.get(['numberOfWords'],(result)=>{
+  let wordCountElement = document.getElementsByClassName("words-count")[0];
+  console.log("result",result);
+  wordCountElement.innerText= result.numberOfWords ? result.numberOfWords : 0;
+})
 
 
 // // Initialize button with user's preferred color
