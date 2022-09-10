@@ -1,8 +1,6 @@
 /**
  * Things to do
- * 1. Set language
- * 2. Set number of words
- * 3. Set difficulty
+ * 1. Set number of words
  */
 
 //get selected language and set it as a value for the selected input
@@ -11,7 +9,7 @@ chrome.storage.sync.get(['selectedLanguage'], (result) => {
   selectedLanguageElement.value=result.selectedLanguage;
 });
 
-//event listener function for selectElement
+//event listener function for selectLanguageElement
 const selectLanguageOnChange = () =>{
   let selectedLanguage = document.getElementById("language-select").value;
   chrome.storage.sync.set({selectedLanguage:selectedLanguage});
@@ -28,6 +26,21 @@ chrome.storage.sync.get(['numberOfWords'],(result)=>{
   wordCountElement.innerText= result.numberOfWords ? result.numberOfWords : 0;
 })
 
+//get selected difficulty 
+chrome.storage.sync.get(['selectedDifficulty'], (result) => {
+  let difficultyElement = document.getElementById("difficulty-select");
+  difficultyElement.value=result.selectedDifficulty;
+});
+
+//event listener function for range selection
+const difficultyOnChange = () =>{
+  let selectedDifficulty = document.getElementById("difficulty-select").value;
+  chrome.storage.sync.set({selectedDifficulty:selectedDifficulty});
+}
+
+//add event listener to select difficulty
+let selectedDifficultyElement = document.getElementById("difficulty-select");
+selectedDifficultyElement.addEventListener('change',difficultyOnChange);
 
 // // Initialize button with user's preferred color
 // let changeColor = document.getElementById("changeColor");
