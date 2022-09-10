@@ -20,7 +20,7 @@ translateButton.addEventListener("click", async () => {
 
 // The body of this function will be executed as a content script inside the
 // current page
-function translateFunction() {
+async function translateFunction() {
 
   console.log("I am going to start translating the content on this page!");
 
@@ -49,10 +49,55 @@ function translateFunction() {
   }
 
   // Now we have the random words that we are going to translate
+  // console.log(randomWords);
 
-  console.log(randomWords);
+  // once we have the words we send this to the function that does the API call and get's us the translated data
+
+  let translatedWords = await getTranslatedWords(randomWords);
 
 
+  console.log("Translated words");
+  console.log(translatedWords);
+
+  async function getTranslatedWords(arrayOfwords) {
+
+    textBody = []
+    for (let i = 0; i < arrayOfwords.length; i++) {
+      word = { "Text": arrayOfwords[i] }
+      textBody.push(word)
+    }
+
+    console.log("text body");
+    console.log(textBody);
+    const options = {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'X-RapidAPI-Key': "", // put key here
+        'X-RapidAPI-Host': "", // put key here
+        "Access-Control-Allow-Origin": '*'
+      },
+      body: textBody
+    };
+
+    console.log("Doing fetch cal");
+    fetch('https://microsoft-translator-text.p.rapidapi.com/translate?to%5B0%5D=es&api-version=3.0&profanityAction=NoAction&textType=plain', options)
+      .then(response => response.json())
+      .then((result) => {
+
+        console.log(result);
+        console.log("received output");
+        output = []
+        for (let i = 0; i < result.length; i++) {
+          output.push(result[i].translations[0].text)
+        }
+    
+        return output
+      })
+      .catch(err => console.error(err));
+
+
+  }
 
   /**
  * This function takes in a string and returns an array of string
