@@ -27,5 +27,12 @@ export function getTranslations(arrayOfwords){
     })
 	.catch(err => console.error(err));
 
-    return result;
+    output =[]
+    for (let i=0; i<result.length; i++){
+        output.push(result[i].translations[0].text)
+    }
+
+    return output
 }
+
+
