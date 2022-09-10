@@ -31,6 +31,10 @@ body{
     flex:1;
 }
 
+.flex-row > label{
+  flex:1;
+}
+
 .flex-row > div:nth-child(2){
     display: flex;
     justify-content: flex-end;
