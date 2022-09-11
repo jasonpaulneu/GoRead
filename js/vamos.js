@@ -277,22 +277,19 @@ async function translateFunction() {
       // let's get the x random words from this sentence
       let arr = [];
 
-      // for (let i = 0; i < x; i++) {
-        
-       
-      //   // console.log(splitArray);
-      //   // console.log(splitArray[Math.floor(Math.random() * len)]);
-      //   arr.push(splitArray[Math.floor(Math.random() * len)]);
-      // }
+      // we split the array based on space but we take only elements that are entire words
+
+      const regex = /^\w+$/;
       let splitArray = text.split(" ");
       let len = splitArray.length;
-      let regex = /^\w+$/;
-      while(x>0){
-        let word = splitArray[Math.floor(Math.random() * len)];
+
+      let i = 0;
+      while(i < x){
+        let word = splitArray[i];
         if(word.match(regex)){
-        arr.push(word);
-        x--;
+          arr.push(word); 
         }
+        i++;
       }
 
       return arr;
