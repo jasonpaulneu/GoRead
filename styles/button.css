@@ -11,3 +11,32 @@ button {
     box-shadow: 0 0 0 2px white,
                 0 0 0 4px black;
   }
+
+  .selection_bubble{
+    position: absolute;
+    top: 0;
+    left: 0;
+    background:-webkit-gradient(linear, left top, left bottom, from(#9999ff), to(#b3b3ff));
+    background-color: #000000;
+    width:15rem;
+  }
+
+  .words{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    color:#125479;
+}
+
+.hor-separator{
+    width: 0.2rem;
+    background-color: #125479;
+}
+
+.popup-container{
+background: #FFFFFF;
+border: 0.4px solid #6DCEE3;
+box-shadow: 0px 4px 4px rgba(64, 94, 121, 0.22);
+border-radius: 5px;
+z-index: 1;
+}

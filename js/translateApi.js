@@ -8,7 +8,7 @@ export function getTranslations(arrayOfwords){
        word = {"Text":arrayOfwords[i]}
        textBody.push(word)
     }
-    console.log(textBody)
+    // console.log(textBody)
     const options = {
         method: 'POST',
         headers: {
@@ -22,7 +22,7 @@ export function getTranslations(arrayOfwords){
     fetch('https://microsoft-translator-text.p.rapidapi.com/translate?to%5B0%5D=es&api-version=3.0&profanityAction=NoAction&textType=plain', options)
 	.then(response => response.json())
 	.then((response) => {
-        console.log(response)
+        // console.log(response)
         result = response
     })
 	.catch(err => console.error(err));
