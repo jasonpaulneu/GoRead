@@ -122,12 +122,6 @@ async function translateFunction() {
         }
     }
 
-    console.log("wordsAndIndexes", wordsAndIndexes);
-    console.log("randonWords", randomWords);
-
-    // Now we have the random words that we are going to translate
-    // console.log(randomWords);
-
     // once we have the words we send this to the function that does the API call and get's us the translated data
 
     let translatedWords = await getTranslations(randomWords); // actual function call
@@ -152,7 +146,6 @@ async function translateFunction() {
          * To replace the dom elements, we know that for every dom element we have 'frequency' number of replacements to make
          * and the words are present in the same order
          */
-        // console.log("Ulle poichu");
         let count = 0;
         //  let index=0;
 
@@ -160,18 +153,15 @@ async function translateFunction() {
             let targetWord = wordsToReplace[index].word;
             let replacement = replacementWords[index];
 
-            console.log("Word: ", targetWord, "ptagIndex: ", wordsToReplace[index].pTagIndex, " Translation: ", replacement);
             let domElem = domElements.item(wordsToReplace[index].pTagIndex);
-            console.log("domelement", domElem);
             for (let j = 0; j < domElements[wordsToReplace[index].pTagIndex].childElementCount; j++) {
                 let el = domElem.childNodes[j];
-                console.log("el", el);
+
 
                 if (el.nodeType === 3) {
 
                     // check if this element contains that word
                     let value = el.nodeValue;
-                    console.log("node value", value);
                     // check if any of the words in this value equals the target word
                     let splitArray = value.split(" ");
 
@@ -343,7 +333,7 @@ async function translateFunction() {
 
     function getRandomWords(text, pTagIndex) {
 
-        // console.log(text);
+
         // we set the number of words that we wanna translate in a sentence
         let x = 10;
 
@@ -352,9 +342,6 @@ async function translateFunction() {
 
         // for (let i = 0; i < x; i++) {
 
-
-        //   // console.log(splitArray);
-        //   // console.log(splitArray[Math.floor(Math.random() * len)]);
         //   arr.push(splitArray[Math.floor(Math.random() * len)]);
         // }
         let splitArray = text.split(" ");

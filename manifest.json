@@ -1,6 +1,6 @@
 {
     "name": "GoRead",
-    "description": "A simple language learning chrome extension app that helps you learn languages intuitively (On the go) without specifically dedicating time towards it!",
+    "description": "A simple language learning chrome extension app that helps you learn languages intuitively (On the go)!",
     "version": "1.0",
     "manifest_version": 3,
     "background": {
