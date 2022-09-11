@@ -39,6 +39,7 @@ async function translateFunction() {
 
   // Lets listen to mouseup DOM events.
   document.addEventListener('mouseup', function (e) {
+    console.log("enter")
     //checking if e has a class translate-span
     if (e.target.classList.contains('translate-span')) {
       let translatedWord = e.target.innerText;
@@ -51,6 +52,7 @@ async function translateFunction() {
 
   // Close the bubble when we click on the screen.
   document.addEventListener('mousedown', function (e) {
+    console.log("mouse leave");
     bubbleDOM.style.visibility = 'hidden';
   }, false);
 
@@ -176,10 +178,16 @@ async function translateFunction() {
               // we replace that word with the new word
               let index = splitArray.indexOf(targetWord);
 
-              splitArray[index] = `<span style="background-color: #6dcee396;
+              splitArray[index] = `<span
+
+              onmouseout='this.style.textDecoration="none"' 
+              onmouseover='this.style.textDecoration="underline"'
+              
+              style="background-color: #6dcee396;
               border: 1px solid #6dcee396;
               border-radius: 0.5em;
               padding: 0.4em;
+              cursor: pointer;
               user-select: none;" class="translate-span" data-orgword="${targetWord}">${replacement}</span>`;
 
               value = splitArray.join(" ");
