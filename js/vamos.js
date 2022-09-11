@@ -87,12 +87,15 @@ async function translateFunction() {
     for(let i = 0; i < domElements.length; i++){
       let domElem = domElements.item(i);
 
+      console.log(domElem);
+
       // slice function, start is inclusive, end is exclusive
       let targetWords = wordsToReplace.slice(count, count+frequency);
-      
+      console.log(targetWords);
+
 
       let swapWords = replacementWords.slice(count, count+frequency);
-      
+      console.log(swapWords);
 
       // for each target word identify the position of that in the pTags
 
@@ -119,21 +122,31 @@ async function translateFunction() {
             
             // check if this element contains that word
             let value = el.nodeValue;
-            
-            if(value.includes(targetWord)){
 
+            // check if any of the words in this value equals the target word
+            let splitArray = value.split(" ");
+            
+            if(splitArray.some(x => x===targetWord)){
+              // we replace that word with the new word
+              let index = splitArray.indexOf(targetWord);
+
+              splitArray[index] = `<span style="    background-color: #6dcee396;
+              border: 1px solid #6dcee396;
+              border-radius: 0.5em;
+              padding: 0.4em;
+              user-select: none;
+              cursor: pointer;">${replacement}</span>`;
+
+              value = splitArray.join(" ");
+              
               // yes it contains, we replace that with a new span element
               let newSpan = document.createElement("span");
-
-              // console.log(value);
-              console.log(targetWord);
-              console.log(replacement);
-              value = value.replace(targetWord, `<span class="hoverElement">${replacement}</span>`);
-              // console.log(value);
               newSpan.innerHTML = value;
 
               el.replaceWith(newSpan);
+
             }
+
           }
         }
 
