@@ -57,17 +57,18 @@ async function translateFunction() {
   }, false);
 
   function renderBubble(mouseX, mouseY, translatedWord, orgWord) {
-    bubbleDOM.innerHTML = `<div class="popup-container">
-    <div class="words">
-        <div>
-            ${orgWord}
-        </div>
-        <div class="hor-separator"> </div>
-        <div>
-            ${translatedWord}
-        </div>
-    </div>
-</div>`;
+    bubbleDOM.innerHTML = `
+    <table class="popup-container" style="width: 100%;">
+      <tr class="words">
+          <td>
+          &#127482;&#127480;&nbsp;&nbsp;${orgWord}
+          </td>
+          <td class="hor-separator"> </td>
+          <td>
+          &#127466;&#127480;&nbsp;&nbsp;${translatedWord}
+          </td>
+      </tr>
+    </table>`;
     bubbleDOM.style.top = mouseY + 'px';
     bubbleDOM.style.left = mouseX + 'px';
     bubbleDOM.style.visibility = 'visible';
@@ -179,10 +180,6 @@ async function translateFunction() {
               let index = splitArray.indexOf(targetWord);
 
               splitArray[index] = `<span
-
-              onmouseout='this.style.textDecoration="none"' 
-              onmouseover='this.style.textDecoration="underline"'
-              
               style="background-color: #6dcee396;
               border: 1px solid #6dcee396;
               border-radius: 0.5em;
