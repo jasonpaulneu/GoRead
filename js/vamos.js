@@ -7,25 +7,25 @@ let translateButton = document.getElementById("translate");
  */
 
 // When the button is clicked, inject the translate function into current page
-translateButton.addEventListener("click", async () => {
-  let [tab] = await chrome.tabs.query({
-    active: true,
-    currentWindow: true
-  });
+translateButton.addEventListener("click", async() => {
+    let [tab] = await chrome.tabs.query({
+        active: true,
+        currentWindow: true
+    });
 
-  chrome.scripting.executeScript({
-    target: {
-      tabId: tab.id
-    },
-    func: translateFunction
-  });
+    chrome.scripting.executeScript({
+        target: {
+            tabId: tab.id
+        },
+        func: translateFunction
+    });
 
-  chrome.scripting.insertCSS({
-    target: {
-      tabId: tab.id
-    },
-    files: ['styles/button.css']
-  })
+    chrome.scripting.insertCSS({
+        target: {
+            tabId: tab.id
+        },
+        files: ['styles/button.css']
+    })
 
 });
 
@@ -33,234 +33,307 @@ translateButton.addEventListener("click", async () => {
 // current page
 async function translateFunction() {
 
-  var bubbleDOM = document.createElement('div');
-  bubbleDOM.setAttribute('class', 'selection_bubble');
-  document.body.appendChild(bubbleDOM);
+    var bubbleDOM = document.createElement('div');
+    bubbleDOM.setAttribute('class', 'selection_bubble');
+    document.body.appendChild(bubbleDOM);
 
-  // Lets listen to mouseup DOM events.
-  document.addEventListener('mouseup', function (e) {
-    //checking if e has a class translate-span
-    if (e.target.classList.contains('translate-span')) {
-      let translatedWord = e.target.innerText;
-      let orgWord = e.target.getAttribute('data-orgword');
-      if (translatedWord.length > 0) {
-        renderBubble(e.pageX, e.pageY, translatedWord, orgWord);
-      }
+    // Lets listen to mouseup DOM events.
+    document.addEventListener('mouseup', function(e) {
+        //checking if e has a class translate-span
+        if (e.target.classList.contains('translate-span')) {
+            let translatedWord = e.target.innerText;
+            let orgWord = e.target.getAttribute('data-orgword');
+            if (translatedWord.length > 0) {
+                renderBubble(e.pageX, e.pageY, translatedWord, orgWord);
+            }
+        }
+    }, false);
+
+    // Close the bubble when we click on the screen.
+    document.addEventListener('mousedown', function(e) {
+        bubbleDOM.style.visibility = 'hidden';
+    }, false);
+
+    function renderBubble(mouseX, mouseY, translatedWord, orgWord) {
+
+        bubbleDOM.innerHTML = `
+  
+      <table class="popup-container" style="width: 100%;">
+  
+        <tr class="words">
+  
+            <td style="border:none;" >
+  
+            &#127482;&#127480;&nbsp;&nbsp;${orgWord}
+  
+            </td>
+  
+            <td class="hor-separator"> </td>
+  
+            <td style="border:none;" >
+  
+            &#127466;&#127480;&nbsp;&nbsp;${translatedWord}
+  
+            </td>
+  
+        </tr>
+  
+      </table>`;
+
+        bubbleDOM.style.top = mouseY + 'px';
+
+        bubbleDOM.style.left = mouseX + 'px';
+
+        bubbleDOM.style.visibility = 'visible';
+
     }
-  }, false);
-
-  // Close the bubble when we click on the screen.
-  document.addEventListener('mousedown', function (e) {
-    bubbleDOM.style.visibility = 'hidden';
-  }, false);
-
-  function renderBubble(mouseX, mouseY, translatedWord, orgWord) {
-    bubbleDOM.innerHTML = `<div class="popup-container">
-    <div class="words">
-        <div>
-            ${orgWord}
-        </div>
-        <div class="hor-separator"> </div>
-        <div>
-            ${translatedWord}
-        </div>
-    </div>
-</div>`;
-    bubbleDOM.style.top = mouseY + 'px';
-    bubbleDOM.style.left = mouseX + 'px';
-    bubbleDOM.style.visibility = 'visible';
-  }
 
 
-  // console.log("I am going to start translating the content on this page!");
+    // console.log("I am going to start translating the content on this page!");
 
-  // picking the p tags on the page
+    // picking the p tags on the page
 
-  let domElems = document.getElementsByTagName("p");
+    let domElems = document.getElementsByTagName("p");
 
 
-  // we have an array that stores all the random words selected on the page,
-  // we can split it based on the frequency count to decide which p Tag it relates to
-  let randomWords = [];
+    // we have an array that stores all the random words selected on the page,
+    // we can split it based on the frequency count to decide which p Tag it relates to
+    let randomWords = [];
 
-  // We try to modify words in all the ptags that we find on the page
-  for (let i = 0; i < domElems.length; i++) {
-    // here we are iterating through the pTag elements
+    let wordsAndIndexes = [];
 
-    // getting the element
-    let elem = domElems.item(i);
+    // We try to modify words in all the ptags that we find on the page
+    for (let i = 0; i < domElems.length; i++) {
+        // here we are iterating through the pTag elements
 
-    // getting the text from the elem
-    let textContent = elem.innerText;
+        // getting the element
+        let elem = domElems.item(i);
 
-    // selecting n random words form the text and updating the randomWords array
-    randomWords.push(...getRandomWords(textContent));
+        // getting the text from the elem
+        let textContent = elem.innerText;
 
-  }
+        // selecting n random words form the text and updating the randomWords array
+        let retArr = getRandomWords(textContent, i);
+        if (retArr.length > 0) {
+            wordsAndIndexes.push(...retArr);
+            retArr.forEach((wordObj) => {
+                randomWords.push(wordObj.word)
+            })
+        }
+    }
 
-  // Now we have the random words that we are going to translate
-  // console.log(randomWords);
+    console.log("wordsAndIndexes", wordsAndIndexes);
+    console.log("randonWords", randomWords);
 
-  // once we have the words we send this to the function that does the API call and get's us the translated data
+    // Now we have the random words that we are going to translate
+    // console.log(randomWords);
 
-   let translatedWords = await getTranslations(randomWords); // actual function call
-  // let translatedWords = tempTranslate(randomWords); // actual function call
+    // once we have the words we send this to the function that does the API call and get's us the translated data
 
-  /**
-   * Now that we have translated the words, let's go ahead with replacing the words in the dom with the translated words
-   */
-  replaceDom(domElems, randomWords, translatedWords, 3);
-
-  /**
-   * This function access the dom elements and swaps the original words with the translated words
-   * This also adds the tag to surround those elements so that we can add the required styling and the tooltip
-   * @param {HtmlElement} domElements - the dom elements that have to be modified
-   * @param {String} wordsToReplace - words that have to be replaed
-   * @param {String} replacementWords - words that are translated
-   * @param {Number} frequency - number of words to replace per paragrph tag
-   */
-  async function replaceDom(domElements, wordsToReplace, replacementWords, frequency) {
+    let translatedWords = await getTranslations(randomWords); // actual function call
+    // let translatedWords = tempTranslate(randomWords); // actual function call
 
     /**
-     * To replace the dom elements, we know that for every dom element we have 'frequency' number of replacements to make
-     * and the words are present in the same order
+     * Now that we have translated the words, let's go ahead with replacing the words in the dom with the translated words
      */
-    // console.log("Ulle poichu");
-    let count = 0;
-    // we run a for loop for each dom element
-    for (let i = 0; i < domElements.length; i++) {
-      let domElem = domElements.item(i);
+    replaceDom(domElems, wordsAndIndexes, translatedWords, 3);
 
-      // console.log(domElem);
+    /**
+     * This function access the dom elements and swaps the original words with the translated words
+     * This also adds the tag to surround those elements so that we can add the required styling and the tooltip
+     * @param {HtmlElement} domElements - the dom elements that have to be modified
+     * @param {String} wordsToReplace - words that have to be replaed
+     * @param {String} replacementWords - words that are translated
+     * @param {Number} frequency - number of words to replace per paragrph tag
+     */
+    async function replaceDom(domElements, wordsToReplace, replacementWords, frequency) {
 
-      // slice function, start is inclusive, end is exclusive
-      let targetWords = wordsToReplace.slice(count, count + frequency);
-      console.log(targetWords);
+        /**
+         * To replace the dom elements, we know that for every dom element we have 'frequency' number of replacements to make
+         * and the words are present in the same order
+         */
+        // console.log("Ulle poichu");
+        let count = 0;
+        //  let index=0;
 
+        for (let index = 0; index < wordsToReplace.length; index++) {
+            let targetWord = wordsToReplace[index].word;
+            let replacement = replacementWords[index];
 
-      let swapWords = replacementWords.slice(count, count + frequency);
-      console.log(swapWords);
+            console.log("Word: ", targetWord, "ptagIndex: ", wordsToReplace[index].pTagIndex, " Translation: ", replacement);
+            let domElem = domElements.item(wordsToReplace[index].pTagIndex);
+            console.log("domelement", domElem);
+            for (let j = 0; j < domElements[wordsToReplace[index].pTagIndex].childElementCount; j++) {
+                let el = domElem.childNodes[j];
+                console.log("el", el);
 
-      // for each target word identify the position of that in the pTags
+                if (el.nodeType === 3) {
 
-      // now we have this dom element, that is most probably a paragraph tag
+                    // check if this element contains that word
+                    let value = el.nodeValue;
+                    console.log("node value", value);
+                    // check if any of the words in this value equals the target word
+                    let splitArray = value.split(" ");
 
-      // we run a for loop and replace the 3 random words with the new word that we selected
+                    if (splitArray.some(x => x === targetWord)) {
+                        // we replace that word with the new word
+                        let index = splitArray.indexOf(targetWord);
 
-      for (let i = 0; i < targetWords.length; i++) {
+                        splitArray[index] = `<span style="background-color: #6dcee396;
+  border: 1px solid #6dcee396;
+  border-radius: 0.5em;
+  padding: 0.4em;
+  user-select: none;" class="translate-span" data-orgword="${targetWord}">${replacement}</span>`;
 
-        let targetWord = targetWords[i];
-        
-        let replacement = swapWords[i];
+                        value = splitArray.join(" ");
 
-        console.log("Word: ", targetWord, " Translation: ", replacement  );
+                        // yes it contains, we replace that with a new span element
+                        let newSpan = document.createElement("span");
+                        newSpan.innerHTML = value;
 
+                        el.replaceWith(newSpan);
 
-        // now we filter through the p tag and get that text tag and see if this p tag has any text 
-        // that can be highlighted
+                    }
 
-        for (let j = 0; j < domElem.childElementCount; j++) {
-
-          let el = domElem.childNodes[j];
-
-
-          if (el.nodeType === 3) {
-
-            // check if this element contains that word
-            let value = el.nodeValue;
-
-            // check if any of the words in this value equals the target word
-            let splitArray = value.split(" ");
-
-            if (splitArray.some(x => x === targetWord)) {
-              // we replace that word with the new word
-              let index = splitArray.indexOf(targetWord);
-
-              splitArray[index] = `<span style="background-color: #6dcee396;
-              border: 1px solid #6dcee396;
-              border-radius: 0.5em;
-              padding: 0.4em;
-              user-select: none;" class="translate-span" data-orgword="${targetWord}">${replacement}</span>`;
-
-              value = splitArray.join(" ");
-
-              // yes it contains, we replace that with a new span element
-              let newSpan = document.createElement("span");
-              newSpan.innerHTML = value;
-
-              el.replaceWith(newSpan);
-
+                }
             }
 
-          }
         }
 
 
-      }
+        // we run a for loop for each dom element
+        // for (let i = 0; i < domElements.length; i++) {
+        //   let domElem = domElements.item(i);
 
-      count += 3;
+        //   // console.log(domElem);
+
+        //   // slice function, start is inclusive, end is exclusive
+        //   let targetWords = wordsToReplace.slice(count, count + frequency);
+        //   // console.log(targetWords);
+
+
+        //   let swapWords = replacementWords.slice(count, count + frequency);
+        //   // console.log(swapWords);
+
+        //   // for each target word identify the position of that in the pTags
+
+        //   // now we have this dom element, that is most probably a paragraph tag
+
+        //   // we run a for loop and replace the 3 random words with the new word that we selected
+
+        //   for (let i = 0; i < targetWords.length; i++) {
+
+        //     let targetWord = targetWords[i];
+
+        //     let replacement = swapWords[i];
+
+        //     console.log("Word: ", targetWord, " Translation: ", replacement);
+
+
+        //     // now we filter through the p tag and get that text tag and see if this p tag has any text 
+        //     // that can be highlighted
+        //     if (targetWord.length > 0) {
+        //       for (let j = 0; j < domElem.childElementCount; j++) {
+
+        //         let el = domElem.childNodes[j];
+
+
+        //         if (el.nodeType === 3) {
+
+        //           // check if this element contains that word
+        //           let value = el.nodeValue;
+
+        //           // check if any of the words in this value equals the target word
+        //           let splitArray = value.split(" ");
+
+        //           if (splitArray.some(x => x === targetWord)) {
+        //             // we replace that word with the new word
+        //             let index = splitArray.indexOf(targetWord);
+
+        //             splitArray[index] = `<span style="background-color: #6dcee396;
+        //           border: 1px solid #6dcee396;
+        //           border-radius: 0.5em;
+        //           padding: 0.4em;
+        //           user-select: none;" class="translate-span" data-orgword="${targetWord}">${replacement}</span>`;
+
+        //             value = splitArray.join(" ");
+
+        //             // yes it contains, we replace that with a new span element
+        //             let newSpan = document.createElement("span");
+        //             newSpan.innerHTML = value;
+
+        //             el.replaceWith(newSpan);
+
+        //           }
+
+        //         }
+        //       }
+        //     }
+
+
+        //   }
+
+        //   count += 3;
+        // }
+
     }
 
-  }
+    /**
+     * This is a temp function that returns hard coded transated words
+     * using this to proeed with other functionality
+     * 
+     * this takes in an array of words and returns the same array with the characters
+     * "-tr" attached after each word
+     * @param {String} stringArray 
+     * @returns 
+     */
+    function tempTranslate(stringArray) {
 
-  /**
-   * This is a temp function that returns hard coded transated words
-   * using this to proeed with other functionality
-   * 
-   * this takes in an array of words and returns the same array with the characters
-   * "-tr" attached after each word
-   * @param {String} stringArray 
-   * @returns 
-   */
-  function tempTranslate(stringArray) {
+        return stringArray.map(x => x = x + "-tr");
 
-    return stringArray.map(x => x = x + "-tr");
+    }
 
-  }
-
-  /**
-   * This function takes in an array of string and triggers the API call to get the translated data
-   * @param {String} arrayOfwords 
-   */
+    /**
+     * This function takes in an array of string and triggers the API call to get the translated data
+     * @param {String} arrayOfwords 
+     */
     async function getTranslations(arrayOfwords) {
 
-      let result;
-
-      let payload = [];
-      const regex = /^\w+$/;
-      for (let i = 0; i < arrayOfwords.length; i++) {
-        if (arrayOfwords[i].match(regex)) {
-          let word = {
-            from: "en",
-            to: "es",
-            text: arrayOfwords[i]
-          };
-          payload.push(word)
+        let payload = [];
+        const regex = /^\w+$/;
+        for (let i = 0; i < arrayOfwords.length; i++) {
+            if (arrayOfwords[i].match(regex)) {
+                let word = {
+                    from: "en",
+                    to: "es",
+                    text: arrayOfwords[i]
+                };
+                payload.push(word)
+            }
         }
-      }
 
-      const options = {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          'X-RapidAPI-Key': '',
-          'X-RapidAPI-Host': 'translo.p.rapidapi.com'
-        },
-        body: JSON.stringify(payload)
-      };
-      let output = []
-      await fetch('https://translo.p.rapidapi.com/api/v3/batch_translate', options)
-        .then(response => response.json())
-        .then(response => {
-          let result = response.batch_translations
-          for (let i = 0; i < result.length; i++) {
-            output.push(result[i].text)
-          }
-          return output
-        })
-        .catch(err => console.error(err));
+        const options = {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json',
+                'X-RapidAPI-Key': 'fa63420a9fmsha00172c47fe153dp1baa21jsn00b3cc0f5ef8',
+                'X-RapidAPI-Host': 'translo.p.rapidapi.com'
+            },
+            body: JSON.stringify(payload)
+        };
+        let output = []
+        await fetch('https://translo.p.rapidapi.com/api/v3/batch_translate', options)
+            .then(response => response.json())
+            .then(response => {
+                let result = response.batch_translations
+                for (let i = 0; i < result.length; i++) {
+                    output.push(result[i].text)
+                }
+                return output
+            })
+            .catch(err => console.error(err));
 
-      return output
+        return output
     }
 
     /**
@@ -268,33 +341,40 @@ async function translateFunction() {
      * @param {String} text 
      */
 
-    function getRandomWords(text) {
+    function getRandomWords(text, pTagIndex) {
 
-      // console.log(text);
-      // we set the number of words that we wanna translate in a sentence
-      let x = 3;
+        // console.log(text);
+        // we set the number of words that we wanna translate in a sentence
+        let x = 10;
 
-      // let's get the x random words from this sentence
-      let arr = [];
+        // let's get the x random words from this sentence
+        let arr = [];
 
-      // for (let i = 0; i < x; i++) {
-        
-       
-      //   // console.log(splitArray);
-      //   // console.log(splitArray[Math.floor(Math.random() * len)]);
-      //   arr.push(splitArray[Math.floor(Math.random() * len)]);
-      // }
-      let splitArray = text.split(" ");
-      let len = splitArray.length;
-      let regex = /^\w+$/;
-      while(x>0){
-        let word = splitArray[Math.floor(Math.random() * len)];
-        if(word.match(regex)){
-        arr.push(word);
-        x--;
+        // for (let i = 0; i < x; i++) {
+
+
+        //   // console.log(splitArray);
+        //   // console.log(splitArray[Math.floor(Math.random() * len)]);
+        //   arr.push(splitArray[Math.floor(Math.random() * len)]);
+        // }
+        let splitArray = text.split(" ");
+        let len = splitArray.length;
+        let regex = /^[a-z]{4,}$/;
+        console.log("splitArray", splitArray);
+        if (splitArray.length > 0) {
+            while (x > 0) {
+                let word = splitArray[Math.floor(Math.random() * len)];
+                if (word.match(regex)) {
+                    console.log("word", word);
+                    arr.push({
+                        word: word,
+                        pTagIndex: pTagIndex
+                    });
+                }
+                x--;
+            }
         }
-      }
 
-      return arr;
+        return arr;
     }
 }

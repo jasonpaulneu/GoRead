@@ -1,13 +1,13 @@
 {
-    "name": "Getting Started Example",
-    "description": "Build an Extension!",
+    "name": "GoRead",
+    "description": "A simple language learning chrome extension app that helps you learn languages intuitively (On the go) without specifically dedicating time towards it!",
     "version": "1.0",
     "manifest_version": 3,
     "background": {
-        "service_worker":"js/background.js"
-      },
-      "permissions": [ "scripting", "storage", "activeTab", "tabs"],
-      "action": {
+        "service_worker": "js/background.js"
+    },
+    "permissions": ["scripting", "storage", "activeTab", "tabs"],
+    "action": {
         "default_popup": "popup.html",
         "default_icon": {
             "16": "/images/a128.png",
@@ -24,4 +24,4 @@
         "128": "/images/a128.png"
     }
 
-  }
+}
