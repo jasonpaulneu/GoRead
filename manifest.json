@@ -1,6 +1,6 @@
 {
-    "name": "Getting Started Example",
-    "description": "Build an Extension!",
+    "name": "GoRead",
+    "description": "A simple intuitive language learning app!",
     "version": "1.0",
     "manifest_version": 3,
     "background": {
