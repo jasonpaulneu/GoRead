@@ -135,11 +135,11 @@ async function translateFunction() {
 
       // slice function, start is inclusive, end is exclusive
       let targetWords = wordsToReplace.slice(count, count + frequency);
-      // console.log(targetWords);
+      console.log(targetWords);
 
 
       let swapWords = replacementWords.slice(count, count + frequency);
-      // console.log(swapWords);
+      console.log(swapWords);
 
       // for each target word identify the position of that in the pTags
 
@@ -148,8 +148,12 @@ async function translateFunction() {
       // we run a for loop and replace the 3 random words with the new word that we selected
 
       for (let i = 0; i < targetWords.length; i++) {
+
         let targetWord = targetWords[i];
+        
         let replacement = swapWords[i];
+
+        console.log("Word: ", targetWord, " Translation: ", replacement  );
 
 
         // now we filter through the p tag and get that text tag and see if this p tag has any text 
@@ -239,7 +243,7 @@ async function translateFunction() {
         method: 'POST',
         headers: {
           'content-type': 'application/json',
-          'X-RapidAPI-Key': '42b6a75bb4msh1b364f0596aa097p181638jsn7302cb989899',
+          'X-RapidAPI-Key': '',
           'X-RapidAPI-Host': 'translo.p.rapidapi.com'
         },
         body: JSON.stringify(payload)
@@ -273,13 +277,24 @@ async function translateFunction() {
       // let's get the x random words from this sentence
       let arr = [];
 
-      for (let i = 0; i < x; i++) {
-        let splitArray = text.split(" ");
-        let len = splitArray.length;
-        // console.log(splitArray);
-        // console.log(splitArray[Math.floor(Math.random() * len)]);
-        arr.push(splitArray[Math.floor(Math.random() * len)]);
+      // for (let i = 0; i < x; i++) {
+        
+       
+      //   // console.log(splitArray);
+      //   // console.log(splitArray[Math.floor(Math.random() * len)]);
+      //   arr.push(splitArray[Math.floor(Math.random() * len)]);
+      // }
+      let splitArray = text.split(" ");
+      let len = splitArray.length;
+      let regex = /^\w+$/;
+      while(x>0){
+        let word = splitArray[Math.floor(Math.random() * len)];
+        if(word.match(regex)){
+        arr.push(word);
+        x--;
+        }
       }
+
       return arr;
     }
 }
