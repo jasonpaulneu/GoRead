@@ -1,27 +1,29 @@
-
-
-
 // Initialize button for translation
 let translateButton = document.getElementById("translate");
-
-
 
 /**
  * SAMPLE CODE FOR UNDERSTANDING HOW TO MANIPULATE DOM 
  *  
-*/
+ */
 
 // When the button is clicked, inject the translate function into current page
 translateButton.addEventListener("click", async () => {
-  let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  let [tab] = await chrome.tabs.query({
+    active: true,
+    currentWindow: true
+  });
 
   chrome.scripting.executeScript({
-    target: { tabId: tab.id },
+    target: {
+      tabId: tab.id
+    },
     func: translateFunction
   });
 
   chrome.scripting.insertCSS({
-    target:{tabId:tab.id},
+    target: {
+      tabId: tab.id
+    },
     files: ['styles/button.css']
   })
 
@@ -101,13 +103,8 @@ async function translateFunction() {
 
   // once we have the words we send this to the function that does the API call and get's us the translated data
 
-  // let translatedWords = await getTranslatedWords(randomWords); // actual function call
-  let translatedWords = tempTranslate(randomWords); // actual function call
-
-
-
-
-  //===============================
+   let translatedWords = await getTranslations(randomWords); // actual function call
+  // let translatedWords = tempTranslate(randomWords); // actual function call
 
   /**
    * Now that we have translated the words, let's go ahead with replacing the words in the dom with the translated words
@@ -122,7 +119,7 @@ async function translateFunction() {
    * @param {String} replacementWords - words that are translated
    * @param {Number} frequency - number of words to replace per paragrph tag
    */
-  function replaceDom(domElements, wordsToReplace, replacementWords, frequency) {
+  async function replaceDom(domElements, wordsToReplace, replacementWords, frequency) {
 
     /**
      * To replace the dom elements, we know that for every dom element we have 'frequency' number of replacements to make
@@ -153,8 +150,6 @@ async function translateFunction() {
       for (let i = 0; i < targetWords.length; i++) {
         let targetWord = targetWords[i];
         let replacement = swapWords[i];
-
-
 
 
         // now we filter through the p tag and get that text tag and see if this p tag has any text 
@@ -223,72 +218,68 @@ async function translateFunction() {
    * This function takes in an array of string and triggers the API call to get the translated data
    * @param {String} arrayOfwords 
    */
-  async function getTranslatedWords(arrayOfwords) {
+    async function getTranslations(arrayOfwords) {
 
-    textBody = []
-    for (let i = 0; i < arrayOfwords.length; i++) {
-      word = { "Text": arrayOfwords[i] }
-      textBody.push(word)
-    }
+      let result;
 
-    // console.log("text body");
-    // console.log(textBody);
-    const options = {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'X-RapidAPI-Key': "", // put key here
-        'X-RapidAPI-Host': "", // put key here
-        "Access-Control-Allow-Origin": '*'
-      },
-      body: textBody
-    };
-
-    // console.log("Doing fetch cal");
-    fetch('https://microsoft-translator-text.p.rapidapi.com/translate?to%5B0%5D=es&api-version=3.0&profanityAction=NoAction&textType=plain', options)
-      .then(response => response.json())
-      .then((result) => {
-
-        // console.log(result);
-        // console.log("received output");
-        output = []
-        for (let i = 0; i < result.length; i++) {
-          output.push(result[i].translations[0].text)
+      let payload = [];
+      const regex = /^\w+$/;
+      for (let i = 0; i < arrayOfwords.length; i++) {
+        if (arrayOfwords[i].match(regex)) {
+          let word = {
+            from: "en",
+            to: "es",
+            text: arrayOfwords[i]
+          };
+          payload.push(word)
         }
+      }
 
-        return output
-      })
-      .catch(err => console.error(err));
+      const options = {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'X-RapidAPI-Key': '42b6a75bb4msh1b364f0596aa097p181638jsn7302cb989899',
+          'X-RapidAPI-Host': 'translo.p.rapidapi.com'
+        },
+        body: JSON.stringify(payload)
+      };
+      let output = []
+      await fetch('https://translo.p.rapidapi.com/api/v3/batch_translate', options)
+        .then(response => response.json())
+        .then(response => {
+          let result = response.batch_translations
+          for (let i = 0; i < result.length; i++) {
+            output.push(result[i].text)
+          }
+          return output
+        })
+        .catch(err => console.error(err));
 
-
-  }
-
-  /**
- * This function takes in a string and returns an array of words that we want to translate
- * @param {String} text 
- */
-  function getRandomWords(text) {
-
-    // console.log(text);
-    // we set the number of words that we wanna translate in a sentence
-    let x = 3;
-
-    // let's get the x random words from this sentence
-    let arr = [];
-
-    for (let i = 0; i < x; i++) {
-      let splitArray = text.split(" ");
-      let len = splitArray.length;
-      // console.log(splitArray);
-      // console.log(splitArray[Math.floor(Math.random() * len)]);
-      arr.push(splitArray[Math.floor(Math.random() * len)]);
+      return output
     }
 
-    // console.log(arr);
+    /**
+     * This function takes in a string and returns an array of string
+     * @param {String} text 
+     */
 
+    function getRandomWords(text) {
 
-    return arr;
-  }
+      // console.log(text);
+      // we set the number of words that we wanna translate in a sentence
+      let x = 3;
+
+      // let's get the x random words from this sentence
+      let arr = [];
+
+      for (let i = 0; i < x; i++) {
+        let splitArray = text.split(" ");
+        let len = splitArray.length;
+        // console.log(splitArray);
+        // console.log(splitArray[Math.floor(Math.random() * len)]);
+        arr.push(splitArray[Math.floor(Math.random() * len)]);
+      }
+      return arr;
+    }
 }
-
-
