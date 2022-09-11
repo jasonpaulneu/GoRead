@@ -75,6 +75,10 @@ input[type="range"] {
     z-index: 1;
 }
 
+select:focus::after {
+    border: 1px solid #82ADC5;
+}
+
 .words-count {
     text-align: center;
     font-weight: bold;
